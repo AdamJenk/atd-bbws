@@ -11,6 +11,7 @@ import blackboard.persist.course.CourseDbLoader;
 import blackboard.persist.user.UserDbLoader;
 import blackboard.platform.gradebook2.*;
 import blackboard.platform.gradebook2.impl.*;
+import blackboard.platform.ws.*;
 import com.alltheducks.bbws.model.AssessmentItemDto;
 import com.alltheducks.bbws.model.CourseDto;
 import com.alltheducks.bbws.model.MarkDto;
@@ -19,13 +20,15 @@ import com.alltheducks.bbws.util.BbCourseHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import blackboard.data.user.*;
+
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Path("courses")
-@RequiresAuthentication
+//@RequiresAuthentication
 public class CoursesResource {
     final Logger logger = LoggerFactory.getLogger(CoursesResource.class);
     public static final String CLICHED_MESSAGE = "Hello World!";
@@ -49,6 +52,13 @@ public class CoursesResource {
     @GET
     @Produces("application/json")
     public List<CourseDto> listCourses() {
+    
+        try {
+            SessionVO session = WebserviceContext.getCurrentSession();
+        } catch (IllegalStateException ex) {
+            logger.error("Session Error", ex);
+            throw new WebApplicationException("Error retrieving Session", 500);
+        }
         List<CourseDto> courses = new ArrayList<CourseDto>();
         try {
             List<Course> bbCourses = courseDbLoader.loadAllCourses();
@@ -58,8 +68,8 @@ public class CoursesResource {
             throw new WebApplicationException("Error retrieving Courses", 500);
         }
 
-        return courses;
-    }
+        return courses; 
+    } 
 
     @GET
     @Path("/{courseId}")
