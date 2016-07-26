@@ -20,7 +20,9 @@ import com.alltheducks.bbws.util.BbCourseHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import blackboard.data.user.*;
+import blackboard.platform.context.Context;
+import blackboard.platform.context.ContextManagerFactory;
+import blackboard.platform.session.BbSession;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -52,23 +54,23 @@ public class CoursesResource {
     @GET
     @Produces("application/json")
     public List<CourseDto> listCourses() {
-    
-        try {
-            SessionVO session = WebserviceContext.getCurrentSession();
-        } catch (IllegalStateException ex) {
-            logger.error("Session Error", ex);
-            throw new WebApplicationException("Error retrieving Session", 500);
-        }
-        List<CourseDto> courses = new ArrayList<CourseDto>();
-        try {
-            List<Course> bbCourses = courseDbLoader.loadAllCourses();
-            courses = BbCourseHelper.convertBbCoursesToCourseDtos(bbCourses);
-        } catch (PersistenceException ex) {
-            logger.error("Error while retrieving courses", ex);
-            throw new WebApplicationException("Error retrieving Courses", 500);
-        }
+        Context context = ContextManagerFactory.getInstance().getContext();
+        BbSession session = context.getSession();
+        if (session != null){
+            List<CourseDto> courses = new ArrayList<CourseDto>();
+            try {
+                List<Course> bbCourses = courseDbLoader.loadAllCourses();
+                courses = BbCourseHelper.convertBbCoursesToCourseDtos(bbCourses);
+            } catch (PersistenceException ex) {
+                logger.error("Error while retrieving courses", ex);
+                throw new WebApplicationException("Error retrieving Courses", 500);
+            }
 
-        return courses; 
+            return courses; 
+        } else {
+            throw new Error("No valid session found");
+        }
+         
     } 
 
     @GET
