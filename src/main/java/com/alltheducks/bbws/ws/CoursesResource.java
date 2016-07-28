@@ -8,6 +8,7 @@ import blackboard.persist.KeyNotFoundException;
 import blackboard.persist.PersistenceException;
 import blackboard.persist.course.CourseCourseDbLoader;
 import blackboard.persist.course.CourseDbLoader;
+import blackboard.persist.course.CourseMembershipDbLoader;
 import blackboard.persist.user.UserDbLoader;
 import blackboard.platform.gradebook2.*;
 import blackboard.platform.gradebook2.impl.*;
@@ -15,6 +16,7 @@ import blackboard.platform.ws.*;
 import com.alltheducks.bbws.model.AssessmentItemDto;
 import com.alltheducks.bbws.model.CourseDto;
 import com.alltheducks.bbws.model.MarkDto;
+import com.alltheducks.bbws.model.UserDto;
 import com.alltheducks.bbws.security.RequiresAuthentication;
 import com.alltheducks.bbws.util.BbCourseHelper;
 import org.slf4j.Logger;
@@ -113,7 +115,7 @@ public class CoursesResource {
 
             List<GradableItem> gradableItems = gradableItemDAO.loadCourseGradebook(bbCourse.getId(), 0);
 
-            assessmentItems = convertGradableItemsToAssessmentDtos(gradableItems);
+            assessmentItems = BbCourseHelper.convertGradableItemsToAssessmentDtos(gradableItems);
 
         } catch (KeyNotFoundException ex) {
             logger.debug(String.format("No Course with CourseId {} found.", courseId));
@@ -123,6 +125,27 @@ public class CoursesResource {
             throw new WebApplicationException("Error retrieving Courses", 500);
         }
         return assessmentItems;
+    }
+
+    @GET 
+    @Path("{courseId}/users")
+    @Produces("application/json")
+    public List<UserDto> getUsersForCourse (@PathParam("courseId") String courseId) {
+        List<UserDto> userItems = new ArrayList<>();
+        try {
+            Course bbCourse = courseDbLoader.loadByCourseId(courseId);
+            ArrayList courseMembers = CourseMembershipDbLoader.Default.getInstance().loadByCourseId(bbCourse.getId());
+            userItems = BbCourseHelper.convertCourseMembershipToUserDtos(courseMembers);
+
+        } catch (KeyNotFoundException ex) {
+            logger.debug(String.format("No Course with CourseId {} found.", courseId));
+            throw new WebApplicationException(String.format("No Course with CourseId %s found.", courseId), 404);
+        } catch (PersistenceException ex) {
+            logger.error("Error while retrieving courses", ex);
+            throw new WebApplicationException("Error retrieving Courses", 500);
+        }
+
+        return userItems;
     }
 
 
@@ -141,7 +164,7 @@ public class CoursesResource {
             //TODO Check that the gradableItem actually belongs to this course.
             GradableItem gradableItem = gradableItemDAO.loadById(assessmentId);
 
-            assessmentItem = convertGradableItemToAssessmentDto(gradableItem);
+            assessmentItem = BbCourseHelper.convertGradableItemToAssessmentDto(gradableItem);
 
         } catch (KeyNotFoundException ex) {
             logger.debug(String.format("No Course with CourseId {} found.", courseId));
@@ -202,36 +225,4 @@ public class CoursesResource {
         return marks;
     }
 
-    private List<AssessmentItemDto> convertGradableItemsToAssessmentDtos(List<GradableItem> gradableItems) throws PersistenceException {
-        List<AssessmentItemDto> assessmentItems = new ArrayList<>();
-
-        for (GradableItem gradableItem : gradableItems) {
-            AssessmentItemDto assessmentItem = convertGradableItemToAssessmentDto(gradableItem);
-            assessmentItems.add(assessmentItem);
-        }
-
-        return assessmentItems;
-    }
-
-    private AssessmentItemDto convertGradableItemToAssessmentDto(GradableItem item) throws PersistenceException {
-        AssessmentItemDto assessmentItem = new AssessmentItemDto();
-        assessmentItem.setId(item.getId().getExternalString());
-        assessmentItem.setName(item.getDisplayTitle());
-        assessmentItem.setInternalName(item.getTitle());
-        assessmentItem.setPointsPossible(item.getPoints());
-        assessmentItem.setUserCreatedAssessment(item.isUserCreatedColumn());
-
-        GradingSchema schema = gradingSchemaDAO.loadById(item.getGradingSchemaId());
-        GradingSchema.Type bbType = schema.getScaleType();
-
-        logger.debug("Gradable item type is: {}", bbType);
-        if (bbType == BaseGradingSchema.Type.SCORE) {
-            assessmentItem.setValueType(AssessmentItemDto.ValueType.NUMBER);
-        } else if (bbType == BaseGradingSchema.Type.PERCENT) {
-            assessmentItem.setValueType(AssessmentItemDto.ValueType.PERCENT);
-        } else if (bbType == BaseGradingSchema.Type.TEXT) {
-            assessmentItem.setValueType(AssessmentItemDto.ValueType.TEXT);
-        }
-        return assessmentItem;
-    }
 }

@@ -10,7 +10,7 @@ import java.util.List;
  * Copyright All the Ducks Pty. Ltd.
  */
 public class CourseDto {
-
+    String type = "course";
     String id;
     String courseId;
     String externalId;

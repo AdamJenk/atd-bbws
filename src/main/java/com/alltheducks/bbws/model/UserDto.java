@@ -1,8 +1,9 @@
 package com.alltheducks.bbws.model;
 
 
-public class StudentDto {
-    private String id;
+public class UserDto {
+	private String type = "user";
+	private String id;
     private String uun;
     private String familyName;
     private String middleName;
@@ -22,7 +23,7 @@ public class StudentDto {
         return uun;
     }
 
-    public void setCourseId(String uun) {
+    public void setUun(String uun) {
         this.uun = uun;
     }
 
