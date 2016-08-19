@@ -10,12 +10,17 @@ import java.util.List;
  * Copyright All the Ducks Pty. Ltd.
  */
 public class CourseDto {
-    String type = "course";
-    String id;
-    String courseId;
-    String externalId;
-    String title;
-    List<CourseDto> children;
+    private String type = "course";
+    private String id;
+    private Attributes attributes;
+    //String courseId;
+    //String externalId;
+    //String title;
+    //List<CourseDto> children;
+
+    public String getType() {
+        return this.type;
+    }
 
     public String getId() {
         return id;
@@ -25,6 +30,20 @@ public class CourseDto {
         this.id = id;
     }
 
+    public void setAttributes(Attributes attributes){
+        this.attributes = attributes;
+    }
+
+    public Attributes getAttributes(){
+        return attributes;
+    }
+
+    public static class Attributes {
+        public String courseId;
+        public String externalId;
+        public String title;
+    }
+    /*
     public String getCourseId() {
         return courseId;
     }
@@ -56,4 +75,9 @@ public class CourseDto {
     public void setChildren(List<CourseDto> children) {
         this.children = children;
     }
+    */
+    
 }
+
+
+

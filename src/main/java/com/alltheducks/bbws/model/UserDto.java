@@ -4,10 +4,11 @@ package com.alltheducks.bbws.model;
 public class UserDto {
 	private String type = "user";
 	private String id;
-    private String uun;
-    private String familyName;
-    private String middleName;
-    private String givenName;
+    private Attributes attributes;
+    //private String uun;
+    //private String familyName;
+    //private String middleName;
+    //private String givenName;
 
     //Something for relationships
 	
@@ -19,6 +20,22 @@ public class UserDto {
         this.id = id;
     }
 
+    public void setAttributes(Attributes attributes){
+        this.attributes = attributes;
+    }
+
+    public Attributes getAttributes(){
+        return attributes;
+    }
+
+    public static class Attributes {
+        public String uun;
+        public String familyName;
+        public String middleName;
+        public String givenName;
+    }
+    
+    /*
     public String getUun() {
         return uun;
     }
@@ -26,7 +43,7 @@ public class UserDto {
     public void setUun(String uun) {
         this.uun = uun;
     }
-
+    
     public String getFamilyName() {
         return familyName;
     }

@@ -7,10 +7,15 @@ package com.alltheducks.bbws.model;
 public class AssessmentItemDto {
     private String type = "assessment";
     private String id;
-    private String name;
-    private double pointsPossible;
-    private String courseId;
+    private Attributes attributes;
+    //private String name;
+    //private double pointsPossible;
+    //private String courseId;
     //private ValueType valueType;
+
+    public String getType() {
+        return this.type;
+    }
 
     public String getId() {
         return id;
@@ -20,6 +25,21 @@ public class AssessmentItemDto {
         this.id = id;
     }
 
+    public void setAttributes(Attributes attributes){
+        this.attributes = attributes;
+    }
+
+    public Attributes getAttributes(){
+        return attributes;
+    }
+    
+    public static class Attributes {
+        public String name;
+        public double pointsPossible;
+        public String courseId;
+    }
+
+    /*
     public String getName() {
         return name;
     }
@@ -44,7 +64,7 @@ public class AssessmentItemDto {
         this.courseId = courseId;
     }
 
-    /*
+    
     public ValueType getValueType() {
         return valueType;
     }
@@ -60,5 +80,6 @@ public class AssessmentItemDto {
         DATE
     }
     */
+    
 }
 
